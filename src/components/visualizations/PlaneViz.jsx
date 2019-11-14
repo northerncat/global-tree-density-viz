@@ -6,8 +6,6 @@ import * as THREE from 'three';
 
 import * as GeoTIFF from 'geotiff';
 
-import OrbitControls from './three-examples/OrbitControls';
-
 function PlaneViz() {
     useEffect(() => {
         // === THREE.JS CODE START ===
@@ -69,8 +67,10 @@ function PlaneViz() {
 
     });
 
-    return ( <
-        div className = "plane-viz" / >
+    return (
+        <div
+            className = "plane-viz"
+        />
     );
 }
 
