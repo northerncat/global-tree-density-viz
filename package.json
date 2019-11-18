@@ -11,7 +11,8 @@
     "react-dat-gui": "^4.0.0",
     "react-dom": "^16.11.0",
     "react-scripts": "3.2.0",
-    "three": "^0.110.0"
+    "three": "^0.110.0",
+    "three-globe": "^2.3.6"
   },
   "scripts": {
     "start": "react-scripts start",
