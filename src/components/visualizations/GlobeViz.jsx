@@ -13,6 +13,7 @@ const GLOBE_RADIUS = 6.0;
 
 function GlobeViz() {
     let container;
+    let [ isCanvasAppended, setIsCanvasAppended ] = useState(false);
 
     const [ isActive, setIsActive ] = useState(false);
 
@@ -70,51 +71,59 @@ function GlobeViz() {
         return globe;
     }
 
-    useEffect(() => {
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = GLOBE_RADIUS * 3;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(10, 5, -6);
 
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setClearColor(new THREE.Color(0x000000));
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor(new THREE.Color(0x000000));
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-        const orbitControls = createOrbitControls(camera, renderer.domElement);
-        orbitControls.addEventListener('change', () => renderer.render(scene, camera));
-
-        const globe = addThreeGlobe(scene);
-
-        let isPressed = false;
-        function onMouseDown(event) {
-            isPressed = true;
-        }
-        function onDocumentMouseMove(event) {
-            var mouse = new THREE.Vector2();
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-            var raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera( mouse, camera );
-            var intersects = raycaster.intersectObjects( globe.children, true );
-
-            if(intersects.length > 0 || isPressed) {
-                document.body.style.cursor = "pointer";
-            } else {
-                document.body.style.cursor = "default";
-            }
-        }
-        function onMouseUp(event) {
-            isPressed = false;
-        }
-        document.addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mousemove', onDocumentMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        // addOceanSphere(scene);
-        loadLights(scene);
-
+    function render() {
         renderer.render(scene, camera);
+    }
+
+    const orbitControls = createOrbitControls(camera, renderer.domElement);
+    orbitControls.addEventListener('change', render);
+
+    const globe = addThreeGlobe(scene);
+
+    // cursor changing callbacks
+    let isPressed = false;
+    function onMouseDown(event) {
+        isPressed = true;
+    }
+    function onDocumentMouseMove(event) {
+        var mouse = new THREE.Vector2();
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera( mouse, camera );
+        var intersects = raycaster.intersectObjects( globe.children, true );
+
+        if(intersects.length > 0 || isPressed) {
+            document.body.style.cursor = "pointer";
+        } else {
+            document.body.style.cursor = "default";
+        }
+    }
+    function onMouseUp(event) {
+        isPressed = false;
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onDocumentMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    // addOceanSphere(scene);
+    loadLights(scene);
+    render();
+
+    useEffect(() => {
+        if (!isCanvasAppended) {
+            container.appendChild(renderer.domElement);
+            setIsCanvasAppended(true);
+        }
 
         function getTreeDensityBlockMaterial() {
             return new THREE.ShaderMaterial({
@@ -219,13 +228,13 @@ function GlobeViz() {
                     setIsActive(true);
 
                     allBlocksGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(allBlockVertices), 3));
-                    renderer.render(scene, camera);
+                    render();
 
                     console.log('Done! Max is', maxVal);
                 });
             });
 
-    });
+    }, []);
 
     return (
         <LoadingOverlay
