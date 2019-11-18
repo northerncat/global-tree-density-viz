@@ -30,6 +30,7 @@ function GlobeViz() {
         orbitControls.enablePan = false;
         orbitControls.minDistance = GLOBE_RADIUS * 1.2;
         orbitControls.maxDistance = GLOBE_RADIUS * 3;
+        orbitControls.rotateSpeed = 0.4;
         return orbitControls;
     }
 
@@ -61,6 +62,7 @@ function GlobeViz() {
             .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png');
         globe.scale.set(GLOBE_RADIUS * 0.01, GLOBE_RADIUS * 0.01, GLOBE_RADIUS * 0.01);
         scene.add(globe);
+        return globe;
     }
 
     useEffect(() => {
@@ -76,7 +78,34 @@ function GlobeViz() {
         const orbitControls = createOrbitControls(camera, renderer.domElement);
         orbitControls.addEventListener('change', () => renderer.render(scene, camera));
 
-        addThreeGlobe(scene);
+        const globe = addThreeGlobe(scene);
+
+        let isPressed = false;
+        function onMouseDown(event) {
+            isPressed = true;
+        }
+        function onDocumentMouseMove(event) {
+            var mouse = new THREE.Vector2();
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+            var raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera( mouse, camera );
+            var intersects = raycaster.intersectObjects( globe.children, true );
+
+            if(intersects.length > 0 || isPressed) {
+                document.body.style.cursor = "pointer";
+            } else {
+                document.body.style.cursor = "default";
+            }
+        }
+        function onMouseUp(event) {
+            isPressed = false;
+        }
+        document.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onDocumentMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
         // addOceanSphere(scene);
         loadLights(scene);
 
@@ -159,7 +188,7 @@ function GlobeViz() {
                     const allBlockVertices = [];
                     scene.add(new THREE.Mesh(allBlocksGeometry, material));
 
-                    const step = 3;
+                    const step = 6;
 
                     for (let c = 0; c < width; c += step) {
                         for (let r = 0; r < height; r += step) {
