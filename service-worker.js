@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/global-tree-density-viz/precache-manifest.cb6df1a006701cdf28350dfc93de29f5.js"
+  "/global-tree-density-viz/precache-manifest.1d107957f07c7c40240f2f94aa0a7087.js"
 );
 
 self.addEventListener('message', (event) => {
