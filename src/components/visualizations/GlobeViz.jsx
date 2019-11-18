@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import * as THREE from 'three';
 import ThreeGlobe from 'three-globe';
@@ -7,9 +7,14 @@ import * as GeoTIFF from 'geotiff';
 
 import OrbitControls from '../../three-examples/OrbitControls';
 
+import LoadingOverlay from 'react-loading-overlay';
+
 const GLOBE_RADIUS = 6.0;
 
 function GlobeViz() {
+    let container;
+
+    const [ isActive, setIsActive ] = useState(false);
 
     function sphericalCoordsToVector3(radius, phi, theta) {
         return new THREE.Vector3(
@@ -73,7 +78,7 @@ function GlobeViz() {
         const renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(new THREE.Color(0x000000));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        container.appendChild(renderer.domElement);
 
         const orbitControls = createOrbitControls(camera, renderer.domElement);
         orbitControls.addEventListener('change', () => renderer.render(scene, camera));
@@ -211,6 +216,8 @@ function GlobeViz() {
                         }
                     }
 
+                    setIsActive(true);
+
                     allBlocksGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(allBlockVertices), 3));
                     renderer.render(scene, camera);
 
@@ -221,9 +228,16 @@ function GlobeViz() {
     });
 
     return (
-        <div
-            className = "globe-viz"
-        />
+        <LoadingOverlay
+            active={!isActive}
+            spinner
+            text='Loading Data...'
+        >
+            <span
+                className = "globe-viz"
+                ref={element => container = element}
+            />
+        </LoadingOverlay>
     );
 }
 
