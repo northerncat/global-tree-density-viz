@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "049bac2b071e6be054e01604f70ae801",
+    "revision": "8e1722bbddfb700eb72d9033e25e8e69",
     "url": "/global-tree-density-viz/index.html"
   },
   {
-    "revision": "e025e80cfee57fb41261",
+    "revision": "151c7c78c5b126340c6c",
     "url": "/global-tree-density-viz/static/css/main.34de6062.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/global-tree-density-viz/static/js/2.2c46f81d.chunk.js"
   },
   {
-    "revision": "e025e80cfee57fb41261",
-    "url": "/global-tree-density-viz/static/js/main.836d2996.chunk.js"
+    "revision": "151c7c78c5b126340c6c",
+    "url": "/global-tree-density-viz/static/js/main.50c06de2.chunk.js"
   },
   {
     "revision": "d8449ff711d6fa398074",
