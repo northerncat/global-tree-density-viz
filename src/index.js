@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import GlobeViz from './components/visualizations/GlobeViz.jsx';
+import VisualizationWrapper from './components/visualization-wrapper/VisualizationWrapper.jsx';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<GlobeViz />, document.getElementById('root'));
+ReactDOM.render(<VisualizationWrapper />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -1,14 +1,13 @@
 {
-  "name": "three-globe-experiment",
+  "name": "global-tree-density-viz",
   "version": "0.1.0",
   "private": true,
   "homepage": "http://northerncat.github.io/global-tree-density-viz",
   "dependencies": {
-    "d3": "^5.12.0",
+    "@material-ui/core": "^4.6.1",
     "geotiff": "^1.0.0-beta.6",
     "gh-pages": "^2.1.1",
     "react": "^16.11.0",
-    "react-dat-gui": "^4.0.0",
     "react-dom": "^16.11.0",
     "react-loading-overlay": "^1.0.1",
     "react-scripts": "3.2.0",
