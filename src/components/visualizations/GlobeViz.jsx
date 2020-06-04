@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import * as THREE from 'three';
 import ThreeGlobe from 'three-globe';
@@ -12,7 +12,7 @@ import LoadingOverlay from 'react-loading-overlay';
 const GLOBE_RADIUS = 6.0;
 
 function GlobeViz() {
-    let container;
+    let canvas = useRef(null);
 
     const [ isActive, setIsActive ] = useState(false);
 
@@ -50,15 +50,6 @@ function GlobeViz() {
         scene.add(new THREE.AmbientLight(0x808080));
     }
 
-    function addOceanSphere(scene) {
-        const oceanMaterial = new THREE.MeshPhongMaterial({
-            color: 0x1E90FF,
-        });
-        const oceanSphereGeometry = new THREE.SphereGeometry(GLOBE_RADIUS, 360, 180);
-        const oceanSphere = new THREE.Mesh(oceanSphereGeometry, oceanMaterial);
-        scene.add(oceanSphere);
-    }
-
     function addThreeGlobe(scene) {
         // globe image texture: https://commons.wikimedia.org/wiki/File:Earthmap1000x500.jpg
         // bump map: https://unpkg.com/three-globe@2.3.6/example/img/earth-topology.png
@@ -71,14 +62,15 @@ function GlobeViz() {
     }
 
     useEffect(() => {
+
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = GLOBE_RADIUS * 3;
+        camera.position.set(14, 7, -8);
+        // camera.position.z = GLOBE_RADIUS * 3;
 
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({ canvas });
         renderer.setClearColor(new THREE.Color(0x000000));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
 
         const orbitControls = createOrbitControls(camera, renderer.domElement);
         orbitControls.addEventListener('change', () => renderer.render(scene, camera));
@@ -111,7 +103,14 @@ function GlobeViz() {
         document.addEventListener('mousemove', onDocumentMouseMove);
         document.addEventListener('mouseup', onMouseUp);
 
-        // addOceanSphere(scene);
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', onWindowResize);
+
         loadLights(scene);
 
         renderer.render(scene, camera);
@@ -173,10 +172,11 @@ function GlobeViz() {
             return vertices;
         }
 
-        // === THREE.JS CODE START ===
-        GeoTIFF.fromUrl('data/Crowther_Nature_Biome_Revision_01_WGS84_GeoTiff_downsampled.tif')
+        setTimeout(() => {
+            GeoTIFF.fromUrl('data/Crowther_Nature_Biome_Revision_01_WGS84_GeoTiff_downsampled.tif')
             .then(tiff => tiff.getImage())
             .then(image => {
+                renderer.render(scene, camera);
                 const width = image.getWidth();
                 const height = image.getHeight();
                 const { minLongitude, minLatitude, maxLongitude, maxLatitude } = getGeoTiffBbox(image);
@@ -190,10 +190,12 @@ function GlobeViz() {
                 image.readRasters().then(raster => {
 
                     const allBlocksGeometry = new THREE.BufferGeometry();
-                    const allBlockVertices = [];
+                    let allBlockVertices = new Float32Array(129605 * 108);
+                    // let allBlockVertices = [];
                     scene.add(new THREE.Mesh(allBlocksGeometry, material));
 
-                    const step = 6;
+                    const step = 3;
+                    let currentIndex = 0;
 
                     for (let c = 0; c < width; c += step) {
                         for (let r = 0; r < height; r += step) {
@@ -210,32 +212,42 @@ function GlobeViz() {
                             const nextLatitude = maxLatitude - (r + step) * rasterLatitudeFactor;
 
                             const blockVertices = getBlockVertices(normalizedValue, latitude, longitude, nextLatitude, nextLongitude);
-                            blockVertices.forEach(coord => {
-                                allBlockVertices.push(coord);
-                            });
+                            for (let i = 0; i < blockVertices.length; ++i) {
+                                allBlockVertices[currentIndex * blockVertices.length + i] = blockVertices[i];
+                            }
+                            currentIndex += 1;
+                            // blockVertices.forEach(coord => allBlockVertices.push(coord))
                         }
                     }
 
                     setIsActive(true);
 
-                    allBlocksGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(allBlockVertices), 3));
+                    allBlocksGeometry.setAttribute('position', new THREE.BufferAttribute(allBlockVertices, 3));
+                    // allBlocksGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(allBlockVertices), 3));
                     renderer.render(scene, camera);
 
-                    console.log('Done! Max is', maxVal);
+                    console.log('Done! Max is', maxVal, currentIndex);
                 });
             });
-
-    });
+        }, 0);
+    }, []);
 
     return (
         <LoadingOverlay
             active={!isActive}
             spinner
             text='Loading Data...'
+            styles={{
+                overlay: (base) => ({
+                  ...base,
+                  background: 'rgba(255, 255, 255, 0.1)'
+                })
+            }}
         >
-            <span
+            <canvas
                 className = "globe-viz"
-                ref={element => container = element}
+                ref={element => canvas = element}
+                style={{ width: '80%', height: '100%', }}
             />
         </LoadingOverlay>
     );
